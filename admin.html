@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ohemaa Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:sans-serif; background:#f1f1f1; }
+    h2 { background:#075E54; color:white; padding:10px; margin:0; }
+    .chat { padding:10px; height:80vh; overflow-y:auto; background:white; }
+    .msg { margin:8px 0; padding:8px; border-radius:6px; }
+    .from-her { background:#e5ddd5; text-align:left; }
+    .from-me { background:#dcf8c6; text-align:right; }
+    .input { display:flex; padding:10px; }
+    .input input { flex:1; padding:10px; }
+    .input button { padding:10px 20px; background:#25D366; border:none; color:white; }
+  </style>
+</head>
+<body>
+  <h2>Ohemaa Admin Chat</h2>
+  <div class="chat" id="chat"></div>
+  <div class="input">
+    <input id="msgInput" placeholder="Reply as Ohemaa…" />
+    <button id="send">Send</button>
+  </div>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7AliRNsgrBeX6tOz2kIbJuJIuAlzZhuY",
+    authDomain: "ohemaaprank.firebaseapp.com",
+    projectId: "ohemaaprank",
+    storageBucket: "ohemaaprank.firebasestorage.app",
+    messagingSenderId: "537123274156",
+    appId: "1:537123274156:web:155fda7c89019f94508e09"
+  };
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const chatRef = db.collection('chats').doc('ohemaa');
+
+  const chatDiv = document.getElementById('chat');
+  function render(msg){
+    const d = document.createElement('div');
+    d.textContent = msg.text;
+    d.className = 'msg ' + (msg.from === 'her' ? 'from-her' : 'from-me');
+    chatDiv.appendChild(d);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  }
+
+  chatRef.onSnapshot(snapshot => {
+    const data = snapshot.data() || { messages: [] };
+    chatDiv.innerHTML = '';
+    data.messages.forEach(render);
+  });
+
+  document.getElementById('send').onclick = () => {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+    chatRef.update({
+      messages: firebase.firestore.FieldValue.arrayUnion({ text, from: 'me' })
+    });
+    input.value = '';
+  };
+</script>
+</body>
+</html>

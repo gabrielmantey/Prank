@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WhatsApp – Ohemaa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #ece5dd; }
+    .header { background: #075E54; color: white; padding: 10px; display:flex; align-items:center; }
+    .header img { width:40px; height:40px; border-radius:50%; margin-right:10px; }
+    .chat-area { height: calc(100vh - 120px); overflow-y:auto; padding:10px; background:#e5ddd5; }
+    .msg { margin:10px 0; max-width:80%; padding:10px; border-radius:10px; font-size:14px; }
+    .incoming { background:white; border-bottom-left-radius:0; }
+    .outgoing { background:#dcf8c6; margin-left:auto; border-bottom-right-radius:0; }
+    .input-area { display:flex; padding:10px; }
+    .input-area input { flex:1; padding:10px; font-size:14px; }
+    .input-area button { padding:10px 20px; font-size:14px; background:#25D366; border:none; color:white; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <img src="https://i.ibb.co/fq8SmC3/girl-avatar.jpg" alt="Ohemaa">
+  <div><strong>Ohemaa</strong><br><small>online</small></div>
+</div>
+<div class="chat-area" id="chatArea"></div>
+<div class="input-area">
+  <input id="inputMsg" placeholder="Type a message…" disabled>
+  <button id="sendBtn" disabled>Send</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7AliRNsgrBeX6tOz2kIbJuJIuAlzZhuY",
+    authDomain: "ohemaaprank.firebaseapp.com",
+    projectId: "ohemaaprank",
+    storageBucket: "ohemaaprank.firebasestorage.app",
+    messagingSenderId: "537123274156",
+    appId: "1:537123274156:web:155fda7c89019f94508e09"
+  };
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const chatRef = db.collection('chats').doc('ohemaa');
+
+  function addMessage(text, type){
+    const div = document.createElement('div');
+    div.textContent = text;
+    div.className = 'msg ' + type;
+    document.getElementById("chatArea").appendChild(div);
+    document.getElementById("chatArea").scrollTop = document.getElementById("chatArea").scrollHeight;
+  }
+
+  chatRef.onSnapshot(snapshot => {
+    const data = snapshot.data() || { messages: [] };
+    const area = document.getElementById("chatArea");
+    area.innerHTML = '';
+    data.messages.forEach(m => {
+      addMessage(m.text, m.from === 'her' ? 'incoming' : 'outgoing');
+    });
+    document.getElementById("inputMsg").disabled = false;
+    document.getElementById("sendBtn").disabled = false;
+  });
+
+  document.getElementById("sendBtn").onclick = () => {
+    const input = document.getElementById("inputMsg");
+    const text = input.value.trim();
+    if (!text) return;
+    chatRef.update({
+      messages: firebase.firestore.FieldValue.arrayUnion({ text, from: 'her' })
+    });
+    input.value = '';
+  };
+</script>
+</body>
+</html>
